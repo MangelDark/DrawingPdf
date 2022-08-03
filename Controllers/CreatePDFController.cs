@@ -1,4 +1,5 @@
 ﻿using DrawingPdf.Methods;
+using DrawingPdf.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -29,7 +30,8 @@ namespace DrawingPdf.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var result = _pdfServices.GenerarPdfMemoryStreamToTabla();
+            var studets = new ReporteStudent();
+            var result = _pdfServices.GenerarPdfMemoryStreamToTabla(studets);
       
             return File(result, "application/pdf", "Reporte.pdf"); 
         }

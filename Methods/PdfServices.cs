@@ -1,6 +1,8 @@
-﻿using iTextSharp.text;
+﻿using DrawingPdf.Models;
+using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DrawingPdf.Methods
@@ -91,7 +93,7 @@ namespace DrawingPdf.Methods
             writer.Close();
         }
 
-        public byte[] GenerarPdfMemoryStream()
+        public byte[] GenerarPdfMemoryStream( )
         {
             byte[] data;
             using (MemoryStream ms = new MemoryStream())
@@ -146,7 +148,7 @@ namespace DrawingPdf.Methods
             return data;
         }
 
-        public byte[] GenerarPdfMemoryStreamToTabla()
+        public byte[] GenerarPdfMemoryStreamToTabla(ReporteStudent reporteStudent)
         {
             byte[] data;
             using (MemoryStream ms = new MemoryStream())
@@ -160,8 +162,8 @@ namespace DrawingPdf.Methods
                 PdfWriter writer = PdfWriter.GetInstance(doc, ms);
                 //Configuracion de fonts
                 Font titulo = new Font(Font.FontFamily.HELVETICA, 16f, iTextSharp.text.Font.BOLD, new BaseColor(20, 150, 246));
-                Font subtitulo = new Font(Font.FontFamily.HELVETICA, 12f, iTextSharp.text.Font.BOLD, new BaseColor(20, 150, 246));
-                Font parrafo = new Font(Font.FontFamily.HELVETICA, 10f, iTextSharp.text.Font.NORMAL, new BaseColor(0, 0, 0));
+                Font subtitulo = new Font(Font.FontFamily.HELVETICA, 14f, iTextSharp.text.Font.BOLD, new BaseColor(20, 150, 246));
+                Font parrafo = new Font(Font.FontFamily.HELVETICA, 12f, iTextSharp.text.Font.NORMAL, new BaseColor(0, 0, 0));
 
                 doc.Open();
                 //Agregamos la imagen
@@ -179,14 +181,13 @@ namespace DrawingPdf.Methods
                 tb.AddCell(new PdfPCell(new Paragraph($"Fecha / Hora: {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss")}", subtitulo) { Alignment = Element.ALIGN_CENTER }) { Border = 0, HorizontalAlignment = Element.ALIGN_CENTER });
                 doc.Add(tb);
                 //Espacio en blanco para separar el en cabezado
-                doc.Add(new Phrase(" \n "));
                 doc.Add(new Phrase(" \n "));            
                 //Creamos la tabla de Informacion
                 tb = new PdfPTable(new float[] { 25f, 25f, 25f, 25f }) { WidthPercentage = 100 };
                 var col1 = new PdfPCell(new Phrase("Dirección Regional", parrafo)) { HorizontalAlignment = Element.ALIGN_BASELINE};
-                var col2 = new PdfPCell(new Phrase("name", parrafo)) { Border = 0, HorizontalAlignment = Element.ALIGN_BASELINE };
+                var col2 = new PdfPCell(new Phrase(" "+reporteStudent.DistritoRegional, parrafo)) { Border = 0, HorizontalAlignment = Element.ALIGN_BASELINE };
                 var col3 = new PdfPCell(new Phrase("Distrito Educativo", parrafo)) { HorizontalAlignment = Element.ALIGN_BASELINE };
-                var col4 = new PdfPCell(new Phrase("name", parrafo)) { Border = 0, HorizontalAlignment = Element.ALIGN_BASELINE };
+                var col4 = new PdfPCell(new Phrase(" " + reporteStudent.DistritoEducativo, parrafo)) { Border = 0, HorizontalAlignment = Element.ALIGN_BASELINE };
                 
                 tb.AddCell(col1);
                 tb.AddCell(col2);
@@ -199,10 +200,60 @@ namespace DrawingPdf.Methods
                 //Tabla del campo centro educativo
                 tb = new PdfPTable(new float[] { 25f, 75f }) { WidthPercentage = 100 };
                 var colCentroEducativoLabel = new PdfPCell(new Phrase("Centro Educativo", parrafo)) { HorizontalAlignment = Element.ALIGN_BASELINE };
-                var colCentroEducativoName = new PdfPCell(new Phrase("name", parrafo)) { Border = 0, HorizontalAlignment = Element.ALIGN_BASELINE };
+                var colCentroEducativoName = new PdfPCell(new Phrase(" " + reporteStudent.CentroEducativo, parrafo)) { Border = 0, HorizontalAlignment = Element.ALIGN_BASELINE };
                 tb.AddCell(colCentroEducativoLabel);
                 tb.AddCell(colCentroEducativoName);
                 doc.Add(tb);
+                //Salto de linea
+                doc.Add(new Phrase(" \n "));
+
+                //DETALLE
+                var tbl = new PdfPTable(new float[] { 25f, 50f, 20f, 15f, 15f, 40f }) { WidthPercentage = 100f };
+                var c1 = new PdfPCell(new Phrase("Id Estudiante", parrafo)) { HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_CENTER, MinimumHeight = 30f };
+                var c2 = new PdfPCell(new Phrase("Nombre Completo", parrafo)) { HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_CENTER, MinimumHeight = 30f };
+                var c3 = new PdfPCell(new Phrase("Nivel", parrafo)) { HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_CENTER, MinimumHeight = 30f };
+                var c4 = new PdfPCell(new Phrase("Grado", parrafo)) { HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_CENTER, MinimumHeight = 30f };
+                var c5 = new PdfPCell(new Phrase("Seccion", parrafo)) { HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_CENTER, MinimumHeight = 30f };
+                var c6 = new PdfPCell(new Phrase("Ausencia Consecutivas", parrafo)) { HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_CENTER, MinimumHeight = 30f };
+                c1.BackgroundColor = new BaseColor(194, 194, 195);
+                c2.BackgroundColor = new BaseColor(194, 194, 195);
+                c3.BackgroundColor = new BaseColor(194, 194, 195);
+                c4.BackgroundColor = new BaseColor(194, 194, 195);
+                c5.BackgroundColor = new BaseColor(194, 194, 195);
+                c6.BackgroundColor = new BaseColor(194, 194, 195);
+                tbl.AddCell(c1);
+                tbl.AddCell(c2);
+                tbl.AddCell(c3);
+                tbl.AddCell(c4);
+                tbl.AddCell(c5);
+                tbl.AddCell(c6);
+
+                c1.BackgroundColor = new BaseColor(255, 255, 255);
+                c2.BackgroundColor = new BaseColor(255, 255, 255);
+                c3.BackgroundColor = new BaseColor(255, 255, 255);
+                c4.BackgroundColor = new BaseColor(255, 255, 255);
+                c5.BackgroundColor = new BaseColor(255, 255, 255);
+                c6.BackgroundColor = new BaseColor(255, 255, 255);
+
+                foreach (var st in reporteStudent.Students)
+                {
+                    c1.Phrase = new Phrase(st.Id.ToString());
+                    c2.Phrase = new Phrase(st.FullName);
+                    c3.Phrase = new Phrase(st.Level);
+                    c4.Phrase = new Phrase(st.Grade);
+                    c5.Phrase = new Phrase(st.Session);
+                    c6.Phrase = new Phrase(st.ConsecutiveAbsence.ToString());
+                    tbl.AddCell(c1);
+                    tbl.AddCell(c2);
+                    tbl.AddCell(c3);
+                    tbl.AddCell(c4);
+                    tbl.AddCell(c5);
+                    tbl.AddCell(c6);
+
+                };
+
+                doc.Add(tbl);
+
 
 
                 doc.Close();
